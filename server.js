@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 
-
 const { Whatsapp } = require("./config");
 const { handleUserMessage } = require("./bot/conversation");
 

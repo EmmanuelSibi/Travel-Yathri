@@ -136,7 +136,7 @@ async function handleUserMessage(message, recipientPhone) {
             
             const formattedText = Object.keys(transformedResponse).map((index) => {
               const flight = transformedResponse[index];
-              return `${index}. ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}\n`;
+              return `Flight ${index + 1}:-\n Airline: ${flight.airline}- Flight Number: ${flight.flightNumber}\n- Price: ${flight.price}\n- Departure: ${flight.departure}\n- Arrival: ${flight.arrival}\n`;
           });
 
             await Whatsapp.sendText({
