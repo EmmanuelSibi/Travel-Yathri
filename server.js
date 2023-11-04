@@ -41,14 +41,16 @@ app.post("/webhook", async (req, res) => {
         let message_id = incomingMessage.message_id; // extract the message id
         let userMessage = incomingMessage.text.body;
        
+          currentmsg = userMessage;
+          console.log(userMessage);
+          const response = await handleUserMessage(userMessage, recipientPhone);
+          console.log(response);   
   
           await Whatsapp.sendText({
             message: `${response}`,
             recipientPhone: recipientPhone,
           });
-        } else {
-          console.log("reppp");
-        }
+        
       }
   
       res.status(200).send("Message received and processed");
