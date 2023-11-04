@@ -29,7 +29,36 @@ app.get("/webhook", (req, res) => {
 });
 console.log("hfff");
 
-app.post("/webhook", (req, res) => {
-
-    
-});
+app.post("/webhook", async (req, res) => {
+    try {
+      let data = Whatsapp.parseMessage(req.body);
+  
+      if (data?.isMessage) {
+        let incomingMessage = data.message;
+        let recipientPhone = incomingMessage.from.phone; // extract the phone number of the customer
+        let recipientName = incomingMessage.from.name; // extract the name of the customer
+        let typeOfMsg = incomingMessage.type; // extract the type of message
+        let message_id = incomingMessage.message_id; // extract the message id
+        let userMessage = incomingMessage.text.body;
+        if (currentmsg !== userMessage) {
+          currentmsg = userMessage;
+          console.log(userMessage);
+          const response = await handleUserMessage(userMessage, recipientPhone);
+          console.log(response);   
+  
+          await Whatsapp.sendText({
+            message: `${response}`,
+            recipientPhone: recipientPhone,
+          });
+        } else {
+          console.log("reppp");
+        }
+      }
+  
+      res.status(200).send("Message received and processed");
+    } catch (error) {
+      console.error("Error handling incoming message:", error);
+      
+      res.status(500).send("Internal Server Error");
+    }
+  });
