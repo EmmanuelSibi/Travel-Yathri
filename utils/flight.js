@@ -133,7 +133,15 @@ const cityAirportCodes = {
     "Zurich": "ZRH"
 };
 
-async function getFlightOffers(city1, city2,date) {
+// const paragraphs = response.map((flight) => {
+//     return Flight Name: ${ flight.airline } \nAmount: ${ flight.price } ${ flight.currency } \nDeparture: ${ flight.departure } \nArrival: ${ flight.arrival } \nDeparture Time: ${ flight.deptime } \nArrival Time: ${ flight.arrivalTime } \n;
+// });
+
+// // Join the paragraphs into a single string
+// const formattedText = paragraphs.join('\n');
+// console.log(formattedText)
+
+async function getFlightOffers(city1, city2) {
     const originLocationCode = getAirportCode(city1);
     const destinationLocationCode = getAirportCode(city2);
 
@@ -144,7 +152,7 @@ async function getFlightOffers(city1, city2,date) {
     const params = {
         originLocationCode,
         destinationLocationCode,
-        departureDate:date ,
+        departureDate: '2023-11-11',
         adults: 1,
         nonStop: true
     };
