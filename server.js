@@ -11,6 +11,8 @@ let currentmsg = "h";
 const app = express();
 
 app.use(bodyParser.json());
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
@@ -45,28 +47,40 @@ function isURL(variable) {
 
 app.post("/webhook", async (req, res) => {
   try {
-    let data = Whatsapp.parseMessage(req.body);
+    if( req && req.body){
+        let data = Whatsapp.parseMessage(req.body);
 
-    if (data?.isMessage) {
-      let incomingMessage = data.message;
-      let recipientPhone = incomingMessage.from.phone; // extract the phone number of the customer
-      let recipientName = incomingMessage.from.name; // extract the name of the customer
-      let typeOfMsg = incomingMessage.type; // extract the type of message
-      let message_id = incomingMessage.message_id; // extract the message id
-      let userMessage = incomingMessage.text.body;
-      if (currentmsg !== userMessage) {
-        currentmsg = userMessage;
-        console.log(userMessage);
-        const response = await handleUserMessage(userMessage, recipientPhone);
+        if (data?.isMessage) {
+            let incomingMessage = data.message;
+            let recipientPhone = incomingMessage.from.phone; // extract the phone number of the customer
+            let recipientName = incomingMessage.from.name; // extract the name of the customer
+            let typeOfMsg = incomingMessage.type; // extract the type of message
+            let message_id = incomingMessage.message_id; // extract the message id
+            let userMessage = incomingMessage.text.body;
+            if (currentmsg !== userMessage) {
+              currentmsg = userMessage;
+              console.log(userMessage);
+               await handleUserMessage(userMessage, recipientPhone);
+      
+              /*await Whatsapp.sendText({
+                message: `${response}`,
+                recipientPhone: recipientPhone,
+              });*/
+            } else {
+              console.log("reppp");
+            }
+          }}
+          else  {
 
-        await Whatsapp.sendText({
-          message: `${response}`,
-          recipientPhone: recipientPhone,
-        });
-      } else {
-        console.log("reppp");
-      }
-    }
+            const buttonText = req.messages[0].button.text;
+            console.log(buttonText);
+
+
+          }
+    
+    
+
+   
 
     res.status(200).send("Message received and processed");
   } catch (error) {
