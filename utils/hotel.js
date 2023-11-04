@@ -53,3 +53,11 @@ module.exports = { getHotelLocations };
 //         res.status(500).json({ error: 'An error occurred' });
 //     }
 // });
+
+
+// const formattedText = Object.keys(hotelData).map((index) => {
+//     const hotel = hotelData[index];
+//     return `${index}. ${hotel.name}\nLocation - ${hotel.mapLink}`;
+// });
+
+// console.log(formattedText.join('\n'));
