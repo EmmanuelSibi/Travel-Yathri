@@ -12,16 +12,7 @@ const openai = new OpenAI({
 async function plannerResponse(destination,source,duration,recipientPhone,isDuration) {
   try {
 
-    if (isDuration) {
-        const msg = `Thank you for choosing us.\n ⏳ Your detailed travel plan is being curated ⏳`;
-        await Whatsapp.sendText({
-          message: `${msg}`,
-          recipientPhone: recipientPhone,
-        });
-        
-        
-        isDuration = false;
-      }
+   
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [

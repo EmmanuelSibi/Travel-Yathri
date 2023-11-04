@@ -1,21 +1,26 @@
-// test
-
-
-const bodyParser = require("body-parser");
 const express = require("express");
+const bodyParser = require("body-parser");
+
+
+
 const { Whatsapp } = require("./config");
-const { handleUserMessage } = require("./conversation");
+const { handleUserMessage } = require("./bot/conversation");
+
+let currentmsg = "h";
+
 const app = express();
+
 app.use(bodyParser.json());
-  
-const port = process.env.PORT || 3000;  
+
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 app.get("/", (req, res) => {
   res.send("kjehdberdbf");
 });
-const mytoken = "testing";
+
+let mytoken = "testing";
 
 app.get("/webhook", (req, res) => {
   let mode = req.query["hub.mode"];
@@ -31,37 +36,42 @@ app.get("/webhook", (req, res) => {
   }
 });
 console.log("hfff");
+function isURL(variable) {
+  const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+
+  
+  return urlPattern.test(variable);
+}
 
 app.post("/webhook", async (req, res) => {
-    try {
-        let data = Whatsapp.parseMessage(req.body);
-    
-        if (data?.isMessage) {
-          let incomingMessage = data.message;
-          let recipientPhone = incomingMessage.from.phone; // extract the phone number of the customer
-          let recipientName = incomingMessage.from.name; // extract the name of the customer
-          let typeOfMsg = incomingMessage.type; // extract the type of message
-          let message_id = incomingMessage.message_id; // extract the message id
-          let userMessage = incomingMessage.text.body;
-         
-            
-            console.log(userMessage);
-            const response = await handleUserMessage(userMessage, recipientPhone);
-            console.log(response);   
-    
-            await Whatsapp.sendText({
-              message: `${response}`,
-              recipientPhone: recipientPhone,
-            });
-          
-        }
-    
-        res.status(200).send("Message received and processed");
-      } catch (error) {
-        console.error("Error handling incoming message:", error);
-        
-        res.status(500).send("Internal Server Error");
+  try {
+    let data = Whatsapp.parseMessage(req.body);
+
+    if (data?.isMessage) {
+      let incomingMessage = data.message;
+      let recipientPhone = incomingMessage.from.phone; // extract the phone number of the customer
+      let recipientName = incomingMessage.from.name; // extract the name of the customer
+      let typeOfMsg = incomingMessage.type; // extract the type of message
+      let message_id = incomingMessage.message_id; // extract the message id
+      let userMessage = incomingMessage.text.body;
+      if (currentmsg !== userMessage) {
+        currentmsg = userMessage;
+        console.log(userMessage);
+        const response = await handleUserMessage(userMessage, recipientPhone);
+
+        await Whatsapp.sendText({
+          message: `${response}`,
+          recipientPhone: recipientPhone,
+        });
+      } else {
+        console.log("reppp");
       }
-  
-    
-  });
+    }
+
+    res.status(200).send("Message received and processed");
+  } catch (error) {
+    console.error("Error handling incoming message:", error);
+    // Handle error and respond with an error status
+    res.status(500).send("Internal Server Error");
+  }
+});

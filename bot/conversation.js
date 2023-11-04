@@ -1,20 +1,30 @@
-const { plannerResponse } = require("./apis/reportGeneration");
-const { witresponse } = require("./apis/wit");
+const axios = require("axios");
+const { plannerResponse } = require("../apis/reportGeneration");
+const { Whatsapp } = require("../config");
 const {
   uploadmediaToWhatsapp,
   sendMessageToWhatsapp,
-} = require("./utils/messageutils");
-const { stringToPdf } = require("./utils/reportutil");
+} = require("../utils/messageutils");
+const { sendStringAsPdfToUser } = require("../utils/reportutil");
+
 
 let destination_stored = "initial";
 let source_stored;
 let duration_stored;
 let isdestination = true;
 
-async function handleUserMessage(userMessage, recipientPhone) {
+async function handleUserMessage(message, recipientPhone) {
+  const witAccessToken = "IHXJHUJOVOHNA6QFICIXSQZCA53NRYNG";
+  const apiUrl = `https://api.wit.ai/message?v=20230904&q=${encodeURIComponent(
+    message
+  )}`;
+  const headers = {
+    Authorization: `Bearer ${witAccessToken}`,
+  };
+
   try {
-    const response = await witresponse(userMessage); //calling witresponse function
-    console.log(response.data);
+    const response = await axios.get(apiUrl, { headers });
+
     if (response.data.intents && response.data.intents.length > 0) {
       const intentName = response.data.intents[0].name;
 
@@ -49,7 +59,7 @@ async function handleUserMessage(userMessage, recipientPhone) {
           return sendmsg;
         }
       }
-      //////duration
+     
       else if (intentName === "duration") {
         if (
           response.data.entities &&
@@ -60,6 +70,7 @@ async function handleUserMessage(userMessage, recipientPhone) {
 
           duration_stored = locationBody;
           isDuration = true;
+
           const response_report = await plannerResponse(
             destination_stored,
             source_stored,
@@ -67,21 +78,29 @@ async function handleUserMessage(userMessage, recipientPhone) {
             recipientPhone,
             isDuration
           );
-          const pdfUrl = await stringToPdf(response_report);
+          const pdfUrl = await sendStringAsPdfToUser(response_report);
+
+         
+          
           console.log(pdfUrl);
           const media_id = await uploadmediaToWhatsapp(pdfUrl);
           console.log(media_id);
           await sendMessageToWhatsapp(media_id, recipientPhone);
-          return "THANK YOU FOR CHOOSING US\nHere is your travel plan\n";
+          return "testing";
         }
-      } else if (intentName === "greet") {
+      }
+      ////
+      else if (intentName === "greet") {
         isdestination = true;
 
         const sendmsg =
-          "Welcome to Testing\nTell us about your travel destination ";
+          "Welcome to Travel Yatri\nTell us about your travel destination ";
 
         return sendmsg;
-      } else if (intentName === "des_travel" || isdestination) {
+      }
+
+      //////
+      else if (intentName === "des_travel" || isdestination) {
         if (
           response.data.entities &&
           response.data.entities["wit$location:location"]
@@ -96,10 +115,16 @@ async function handleUserMessage(userMessage, recipientPhone) {
           return sendmsg;
         }
       }
+
+      console.log("Wit.ai response:", response.data);
+    } else {
+      console.error("No intents found in the Wit.ai response");
     }
   } catch (error) {
-    console.log("error in handle", error);
+    console.error("Error making the request:", error);
   }
 }
 
-module.exports = { handleUserMessage }; //exporting handleusermessage function
+module.exports = {
+  handleUserMessage,
+};

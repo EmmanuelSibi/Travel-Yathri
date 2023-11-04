@@ -1,30 +1,38 @@
-const fs = require("fs");
-const pdfkit = require("pdfkit");
+const fs = require('fs');
+const pdfkit = require('pdfkit');
 
-
-async function stringToPdf(responseReport) {
- 
+// Function to convert a string into a PDF and send it
+async function sendStringAsPdfToUser(responseReport) {
+  // Create a new PDF document
   const doc = new pdfkit();
 
-  
+  // Set up the PDF content
   doc.fontSize(12);
-  doc.text("Travel Report", { align: "center" });
+  doc.text('Travel Report', { align: 'center' });
   doc.text(responseReport);
 
-  
-  const pdfFilePath = "travel_report.pdf"; // Define the file path
+  // Generate the PDF
+  const pdfFilePath = 'travel_report.pdf'; // Define the file path
   const pdfStream = fs.createWriteStream(pdfFilePath);
   doc.pipe(pdfStream);
   doc.end();
 
-  
+  // Wait for the PDF to be written to the file
   await new Promise((resolve) => {
-    pdfStream.on("finish", resolve);
+    pdfStream.on('finish', resolve);
   });
 
   
-  return pdfFilePath;
 
+  //const absolutePath = `${__dirname}/${pdfFilePath}`;
+  return pdfFilePath;
+  
+
+  // Clean up: remove the temporary PDF file
+  //fs.unlinkSync(pdfFilePath);
+
+  // Return the PDF file path
+ 
 }
 
-module.exports = { stringToPdf }; //exporting stringtopdf function
+module.exports = {sendStringAsPdfToUser}
