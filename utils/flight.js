@@ -199,3 +199,14 @@ function getAirportCode(cityName) {
 }
 
 module.exports = { getFlightOffers };
+
+
+// const transformedResponse = {};
+// response.forEach((flight, index) => {
+//     transformedResponse[index + 1] = flight;
+// });
+
+// const formattedText = Object.keys(transformedResponse).map((index) => {
+//     const flight = transformedResponse[index];
+//     return `${index} . ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}`;
+// });
