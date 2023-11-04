@@ -32,8 +32,6 @@ async function handleUserMessage(message, recipientPhone) {
       const intentName = response.data.intents[0].name;
 
       if (intentName === "duration") {
-
-
         if (
           response.data.entities &&
           response.data.entities["wit$duration:duration"]
@@ -126,13 +124,29 @@ async function handleUserMessage(message, recipientPhone) {
           flightchoice = true;
           console.log("flightchoice");
           if (flightchoice) {
-            const response = await getFlightOffers(
+            const transformedResponse = await getFlightOffers(
               source_stored,
               destination_stored,
               starting_date
             );
-            console.log('response');
-            console.log(response);
+            
+            const formattedText = Object.keys(transformedResponse).map((index) => {
+              const flight = transformedResponse[index];
+              return `${index} . ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}`;
+          });
+
+            await Whatsapp.sendText({
+              message: `${formattedText}`,
+              recipientPhone: recipientPhone,
+            });
+            const sendmsg = "Please select the flight number";
+            await Whatsapp.sendText({
+              message: `${sendmsg}`,
+              recipientPhone: recipientPhone,
+            });
+
+            console.log("response");
+           // console.log(response);
           }
         } else {
           const sendmsg = "Okay How many days you want to stay there ?";
@@ -141,7 +155,7 @@ async function handleUserMessage(message, recipientPhone) {
             recipientPhone: recipientPhone,
           });
         }
-      }  
+      }
       ////
       else if (intentName === "greet") {
         isdestination = true;
@@ -156,6 +170,19 @@ async function handleUserMessage(message, recipientPhone) {
       }
 
       //////
+      else if (intentName === 'choice_num'){
+
+        if(response.data.entities && response.data.entities["wit$number:number"] )
+        {
+          const locationBody = response.data.entities["wit$number:number"][0].body;
+         
+          
+
+          //const formattedText = `Your flight number is ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}`;
+         
+        }
+
+      }
       else if (intentName === "des_travel" || isdestination) {
         if (
           response.data.entities &&
@@ -185,5 +212,5 @@ async function handleUserMessage(message, recipientPhone) {
 }
 
 module.exports = {
-  handleUserMessage,
+  handleUserMessage,                                                                                                                                                          
 };
