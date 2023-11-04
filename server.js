@@ -40,11 +40,7 @@ app.post("/webhook", async (req, res) => {
         let typeOfMsg = incomingMessage.type; // extract the type of message
         let message_id = incomingMessage.message_id; // extract the message id
         let userMessage = incomingMessage.text.body;
-        if (currentmsg !== userMessage) {
-          currentmsg = userMessage;
-          console.log(userMessage);
-          const response = await handleUserMessage(userMessage, recipientPhone);
-          console.log(response);   
+       
   
           await Whatsapp.sendText({
             message: `${response}`,
