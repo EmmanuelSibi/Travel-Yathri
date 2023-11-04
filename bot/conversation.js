@@ -5,6 +5,7 @@ const {
   uploadmediaToWhatsapp,
   sendMessageToWhatsapp,
   sendtemplate,
+  sendtemplate_greet,
 } = require("../utils/messageutils");
 const { sendStringAsPdfToUser } = require("../utils/reportutil");
 const { getFlightOffers } = require("../utils/flight");
@@ -15,6 +16,8 @@ let duration_stored;
 let starting_date;
 let isdestination = true;
 let flightchoice = false;
+let flightdata={}
+let flightselection=false;
 
 async function handleUserMessage(message, recipientPhone) {
   const witAccessToken = "IHXJHUJOVOHNA6QFICIXSQZCA53NRYNG";
@@ -129,10 +132,11 @@ async function handleUserMessage(message, recipientPhone) {
               destination_stored,
               starting_date
             );
+            flightdata=transformedResponse;
             
             const formattedText = Object.keys(transformedResponse).map((index) => {
               const flight = transformedResponse[index];
-              return `${index} . ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}`;
+              return `${index}. ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}\n`;
           });
 
             await Whatsapp.sendText({
@@ -148,6 +152,11 @@ async function handleUserMessage(message, recipientPhone) {
             console.log("response");
            // console.log(response);
           }
+          ////hotel choice
+          else if(flightchoice){
+
+          }
+
         } else {
           const sendmsg = "Okay How many days you want to stay there ?";
           await Whatsapp.sendText({
@@ -166,6 +175,7 @@ async function handleUserMessage(message, recipientPhone) {
           message: `${sendmsg}`,
           recipientPhone: recipientPhone,
         });
+        //await sendtemplate_greet(recipientPhone);
         //return sendmsg;
       }
 
@@ -174,11 +184,24 @@ async function handleUserMessage(message, recipientPhone) {
 
         if(response.data.entities && response.data.entities["wit$number:number"] )
         {
-          const locationBody = response.data.entities["wit$number:number"][0].body;
+          const flight_index = response.data.entities["wit$number:number"][0].body;
+         const  flightdatachoice=flightdata[flight_index];
+         console.log(flightdatachoice);
+          const sendmsg = `Your selected flight is ${flightdatachoice.airline} ${flightdatachoice.flightNumber}  PRICE:${flightdatachoice.price} DEPT:${flightdatachoice.departure}  ARR:${flightdatachoice.arrival}\n`;
+
+
+          await Whatsapp.sendText({
+            message: `${sendmsg}`,
+            recipientPhone: recipientPhone,
+          });
+          flightselection=true;
+
+          
+
          
           
 
-          //const formattedText = `Your flight number is ${flight.airline} ${flight.flightNumber} ${flight.price} ${flight.departure} ${flight.arrival}`;
+          
          
         }
 
