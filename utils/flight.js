@@ -141,7 +141,7 @@ const cityAirportCodes = {
 // const formattedText = paragraphs.join('\n');
 // console.log(formattedText)
 
-async function getFlightOffers(city1, city2) {
+async function getFlightOffers(city1, city2,date) {
     const originLocationCode = getAirportCode(city1);
     const destinationLocationCode = getAirportCode(city2);
 
@@ -152,7 +152,7 @@ async function getFlightOffers(city1, city2) {
     const params = {
         originLocationCode,
         destinationLocationCode,
-        departureDate: '2023-11-11',
+        departureDate: date,
         adults: 1,
         nonStop: true
     };
