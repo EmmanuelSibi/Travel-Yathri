@@ -158,6 +158,7 @@ async function getFlightOffers(city1, city2, date) {
     departureDate: date,
     adults: 1,
     nonStop: true,
+    currencyCode: "INR",
   };
 
   try {
@@ -173,19 +174,21 @@ async function getFlightOffers(city1, city2, date) {
       const top5CheapestFlights = sortedFlights.slice(0, 5);
 
       // Prepare the response in JSON format
-      const response = top5CheapestFlights.map((flight, index) => ({
-        flightNumber: flight.itineraries[0].segments[0].number,
-        airline:
-          flightData.result.dictionaries.carriers[
-            flight.validatingAirlineCodes[0]
-          ],
-        price: parseFloat(flight.price.total).toFixed(2),
-        currency: flight.price.currency,
-        departure: flight.itineraries[0].segments[0].departure.iataCode,
-        arrival: flight.itineraries[0].segments[0].arrival.iataCode,
-        deptime: flight.itineraries[0].segments[0].departure.at.slice(11),
-        arrivalTime: flight.itineraries[0].segments[0].arrival.at.slice(11),
-      }));
+      const response = top5CheapestFlights.map((flight, index) => {
+        const airlineCode = flight.validatingAirlineCodes[0];
+        const airlineName = flightData.result.dictionaries.carriers[airlineCode] || 'LUFTHANSA';
+
+        return {
+            flightNumber: flight.itineraries[0].segments[0].number,
+            airline: airlineName,
+            price: parseFloat(flight.price.total).toFixed(2),
+            currency: flight.price.currency,
+            departure: flight.itineraries[0].segments[0].departure.iataCode,
+            arrival: flight.itineraries[0].segments[0].arrival.iataCode,
+            deptime: flight.itineraries[0].segments[0].departure.at.slice(11),
+            arrivalTime: flight.itineraries[0].segments[0].arrival.at.slice(11)
+        };
+    });
 
       const transformedResponse = {};
       response.forEach((flight, index) => {

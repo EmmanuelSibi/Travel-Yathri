@@ -62,7 +62,7 @@ async function handleUserMessage(message, recipientPhone) {
           if (flightchoice && !flightselection) {
             flightdataselect = false;
           }
-          if(hotelchoice){
+          if (hotelchoice) {
             hoteldataselect = true;
           }
 
@@ -75,7 +75,8 @@ async function handleUserMessage(message, recipientPhone) {
             flightdataselect,
             hoteldataselect,
             hoteldatachoice,
-            flightdatachoice,starting_date
+            flightdatachoice,
+            starting_date
           );
           const pdfUrl = await sendStringAsPdfToUser(response_report);
 
@@ -136,9 +137,10 @@ async function handleUserMessage(message, recipientPhone) {
           response.data.entities["wit$datetime:datetime"]
         ) {
           const locationBody =
-            response.data.entities["wit$datetime:datetime"][0].body;
+            response.data.entities["wit$datetime:datetime"][0].value;
+            console.log(locationBody);
 
-          starting_date = locationBody;
+          starting_date = locationBody.slice(0, 10);
 
           await sendtemplate(recipientPhone);
         }
@@ -153,12 +155,18 @@ async function handleUserMessage(message, recipientPhone) {
               destination_stored,
               starting_date
             );
-            flightdata=transformedResponse;
-            
-            const formattedText = Object.keys(transformedResponse).map((index) => {
-              const flight = transformedResponse[index];
-              return `Flight ${index + 1}:-\n Airline: ${flight.airline}- Flight Number: ${flight.flightNumber}\n- Price: ${flight.price}\n- Departure: ${flight.departure}\n- Arrival: ${flight.arrival}\n`;
-          });
+            flightdata = transformedResponse;
+
+            const formattedText = Object.keys(transformedResponse).map(
+              (index) => {
+                const flight = transformedResponse[index];
+                return `${index}. ${flight.airline} - Flight Number: ${
+                  flight.flightNumber
+                }\n- Price: ${flight.price + " Rupees"}\n- Departure Time: ${
+                  flight.deptime
+                }\n- Arrival Time: ${flight.arrivalTime}\n\n`;
+              }
+            );
 
             await Whatsapp.sendText({
               message: `${formattedText}`,
@@ -184,7 +192,7 @@ async function handleUserMessage(message, recipientPhone) {
             hotelchoice = true;
             const formattedText = Object.keys(hotelData).map((index) => {
               const hotel = hotelData[index];
-              return `${index}. ${hotel.name}\nLocation - ${hotel.mapLink}\n`;
+              return `${index}. ${hotel.name}\nLocation - ${hotel.mapLink}\n\n`;
             });
 
             await Whatsapp.sendText({
@@ -205,7 +213,7 @@ async function handleUserMessage(message, recipientPhone) {
             message: `${sendmsg}`,
             recipientPhone: recipientPhone,
           });
-        } 
+        }
       }
       ////
       else if (intentName === "greet") {
@@ -217,18 +225,24 @@ async function handleUserMessage(message, recipientPhone) {
           message: `${sendmsg}`,
           recipientPhone: recipientPhone,
         });
-        destination_stored = "initial";
-        source_stored;
-        duration_stored;
-        starting_date;
-        hoteldatachoice;
-        flightdatachoice;
-        isdestination = true;
-        flightchoice = false;
-        hotelchoice = false;
-        flightdata = {};
-        hoteldata = {};
-        flightselection = false;
+
+         destination_stored = "initial";
+         source_stored;
+         duration_stored;
+         starting_date;
+         hoteldatachoice = null;
+         flightdatachoice = null;
+         isdestination = true;
+         flightchoice = false;
+         hotelchoice = false;
+         flightdata = {};
+         hoteldata = {};
+         flightselection = false;
+         flightchoiceindex = null;
+         flight_index = null;
+         hotel_index = null;
+         flightdataselect = true;
+         hoteldataselect = false;
         //await sendtemplate_greet(recipientPhone);
         //return sendmsg;
       }
@@ -245,23 +259,24 @@ async function handleUserMessage(message, recipientPhone) {
             flightselection = true;
             flightchoice = true;
             console.log(flightdatachoice);
-            const sendmsg = `Your selected flight is ${flightdatachoice.airline} ${flightdatachoice.flightNumber}  PRICE:${flightdatachoice.price} DEPT:${flightdatachoice.departure}  ARR:${flightdatachoice.arrival}\n`;
+            const sendmsg = `Your selected Flight is ${
+              flightdatachoice.airline
+            } ${flightdatachoice.flightNumber}\n  PRICE:${
+              flightdatachoice.price + " Rupees"
+            }\n DEPT:${flightdatachoice.departure}  ARR:${
+              flightdatachoice.arrival
+            }\n`;
 
             await Whatsapp.sendText({
               message: `${sendmsg}`,
               recipientPhone: recipientPhone,
             });
-            const sendmg = `✈️ Headed to ${destination_stored} ??\n
-          🔍 We've got the best deals!\n
-          🛌 Wish to explore top hotel options near ${destination_stored}??\n
-          (yes/no)`;
+            const sendmg = `✈️ Headed to *_${destination_stored}_* ??\n🔍 We've got the best deals!\n 🛌 Wish to explore *_top hotel options_* near *_${destination_stored}_*??\n*_(yes/no)_*`;
             await Whatsapp.sendText({
               message: `${sendmg}`,
               recipientPhone: recipientPhone,
             });
-          }
-
-         else if (flightselection) {
+          } else if (flightselection) {
             hotel_index = response.data.entities["wit$number:number"][0].body;
 
             console.log("hotel choice");
@@ -269,13 +284,14 @@ async function handleUserMessage(message, recipientPhone) {
             hoteldatachoice = hoteldata[hotel_index];
 
             console.log(hoteldatachoice);
-            const sendmsg = `Your selected hotel is ${hoteldatachoice.name}\n LOC:${hoteldatachoice.mapLink} \n`;
+            const sendmsg = `Your selected hotel is\n ${hoteldatachoice.name}\n LOCATION-${hoteldatachoice.mapLink} \n`;
             await Whatsapp.sendText({
               message: `${sendmsg}`,
               recipientPhone: recipientPhone,
             });
 
-            const sendmg = "Okay How many days you want to stay there ?";
+            const sendmg =
+              "Okay Tell us about how much time will you be spending there ?";
             await Whatsapp.sendText({
               message: `${sendmg}`,
               recipientPhone: recipientPhone,
