@@ -56,7 +56,8 @@ app.post("/webhook", async (req, res) => {
             let typeOfMsg = incomingMessage.type; // extract the type of message
             let message_id = incomingMessage.message_id; // extract the message id
             let userMessage = incomingMessage.text.body;
-            if (currentmsg !== userMessage) {
+            if ( userMessage==='Yes'||userMessage === 'yes' || userMessage==='no'||
+            userMessage==='No'||currentmsg !== userMessage) {
               currentmsg = userMessage;
               console.log(userMessage);
                await handleUserMessage(userMessage, recipientPhone);

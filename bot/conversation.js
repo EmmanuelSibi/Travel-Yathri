@@ -9,15 +9,25 @@ const {
 } = require("../utils/messageutils");
 const { sendStringAsPdfToUser } = require("../utils/reportutil");
 const { getFlightOffers } = require("../utils/flight");
+const { getHotelLocations } = require("../utils/hotel");
 
 let destination_stored = "initial";
 let source_stored;
 let duration_stored;
 let starting_date;
+let hoteldatachoice = null;
+let flightdatachoice = null;
 let isdestination = true;
 let flightchoice = false;
-let flightdata={}
-let flightselection=false;
+let hotelchoice = false;
+let flightdata = {};
+let hoteldata = {};
+let flightselection = false;
+let flightchoiceindex = null;
+let flight_index = null;
+let hotel_index = null;
+let flightdataselect = true;
+let hoteldataselect = false;
 
 async function handleUserMessage(message, recipientPhone) {
   const witAccessToken = "IHXJHUJOVOHNA6QFICIXSQZCA53NRYNG";
@@ -49,13 +59,23 @@ async function handleUserMessage(message, recipientPhone) {
             message: `${sendmsg}`,
             recipientPhone: recipientPhone,
           });
+          if (flightchoice && !flightselection) {
+            flightdataselect = false;
+          }
+          if(hotelchoice){
+            hoteldataselect = true;
+          }
 
           const response_report = await plannerResponse(
             destination_stored,
             source_stored,
             duration_stored,
             recipientPhone,
-            isDuration
+            isDuration,
+            flightdataselect,
+            hoteldataselect,
+            hoteldatachoice,
+            flightdatachoice,starting_date
           );
           const pdfUrl = await sendStringAsPdfToUser(response_report);
 
@@ -124,9 +144,10 @@ async function handleUserMessage(message, recipientPhone) {
         }
       } else if (intentName === "choice") {
         if (response.data.entities && response.data.entities["yes:yes"]) {
-          flightchoice = true;
           console.log("flightchoice");
-          if (flightchoice) {
+          console.log(flightselection);
+
+          if (!flightselection) {
             const transformedResponse = await getFlightOffers(
               source_stored,
               destination_stored,
@@ -150,20 +171,41 @@ async function handleUserMessage(message, recipientPhone) {
             });
 
             console.log("response");
-           // console.log(response);
+            // console.log(response);
           }
+
           ////hotel choice
-          else if(flightchoice){
+          else if (flightselection) {
+            console.log("hotel choice");
 
+            const hotelData = await getHotelLocations(destination_stored);
+            console.log(hotelData);
+            hoteldata = hotelData;
+            hotelchoice = true;
+            const formattedText = Object.keys(hotelData).map((index) => {
+              const hotel = hotelData[index];
+              return `${index}. ${hotel.name}\nLocation - ${hotel.mapLink}\n`;
+            });
+
+            await Whatsapp.sendText({
+              message: `${formattedText}`,
+              recipientPhone: recipientPhone,
+            });
+
+            const sendmg = "Please select the hotel number";
+            await Whatsapp.sendText({
+              message: `${sendmg}`,
+              recipientPhone: recipientPhone,
+            });
           }
-
-        } else {
-          const sendmsg = "Okay How many days you want to stay there ?";
+        } else if (response.data.entities && response.data.entities["no:no"]) {
+          flightselection = true;
+          const sendmsg = `✈️ Headed to *_${destination_stored}_* ??\n🔍 We've got the best deals!\n 🛌 Wish to explore *_top hotel options_* near *_${destination_stored}_*??\n*_(yes/no)_*`;
           await Whatsapp.sendText({
             message: `${sendmsg}`,
             recipientPhone: recipientPhone,
           });
-        }
+        } 
       }
       ////
       else if (intentName === "greet") {
@@ -175,38 +217,72 @@ async function handleUserMessage(message, recipientPhone) {
           message: `${sendmsg}`,
           recipientPhone: recipientPhone,
         });
+        destination_stored = "initial";
+        source_stored;
+        duration_stored;
+        starting_date;
+        hoteldatachoice;
+        flightdatachoice;
+        isdestination = true;
+        flightchoice = false;
+        hotelchoice = false;
+        flightdata = {};
+        hoteldata = {};
+        flightselection = false;
         //await sendtemplate_greet(recipientPhone);
         //return sendmsg;
       }
 
       //////
-      else if (intentName === 'choice_num'){
+      else if (intentName === "choice_num") {
+        if (
+          response.data.entities &&
+          response.data.entities["wit$number:number"]
+        ) {
+          if (!flightselection) {
+            flight_index = response.data.entities["wit$number:number"][0].body;
+            flightdatachoice = flightdata[flight_index];
+            flightselection = true;
+            flightchoice = true;
+            console.log(flightdatachoice);
+            const sendmsg = `Your selected flight is ${flightdatachoice.airline} ${flightdatachoice.flightNumber}  PRICE:${flightdatachoice.price} DEPT:${flightdatachoice.departure}  ARR:${flightdatachoice.arrival}\n`;
 
-        if(response.data.entities && response.data.entities["wit$number:number"] )
-        {
-          const flight_index = response.data.entities["wit$number:number"][0].body;
-         const  flightdatachoice=flightdata[flight_index];
-         console.log(flightdatachoice);
-          const sendmsg = `Your selected flight is ${flightdatachoice.airline} ${flightdatachoice.flightNumber}  PRICE:${flightdatachoice.price} DEPT:${flightdatachoice.departure}  ARR:${flightdatachoice.arrival}\n`;
+            await Whatsapp.sendText({
+              message: `${sendmsg}`,
+              recipientPhone: recipientPhone,
+            });
+            const sendmg = `✈️ Headed to ${destination_stored} ??\n
+          🔍 We've got the best deals!\n
+          🛌 Wish to explore top hotel options near ${destination_stored}??\n
+          (yes/no)`;
+            await Whatsapp.sendText({
+              message: `${sendmg}`,
+              recipientPhone: recipientPhone,
+            });
+          }
 
+         else if (flightselection) {
+            hotel_index = response.data.entities["wit$number:number"][0].body;
 
-          await Whatsapp.sendText({
-            message: `${sendmsg}`,
-            recipientPhone: recipientPhone,
-          });
-          flightselection=true;
+            console.log("hotel choice");
 
-          
+            hoteldatachoice = hoteldata[hotel_index];
 
-         
-          
+            console.log(hoteldatachoice);
+            const sendmsg = `Your selected hotel is ${hoteldatachoice.name}\n LOC:${hoteldatachoice.mapLink} \n`;
+            await Whatsapp.sendText({
+              message: `${sendmsg}`,
+              recipientPhone: recipientPhone,
+            });
 
-          
-         
+            const sendmg = "Okay How many days you want to stay there ?";
+            await Whatsapp.sendText({
+              message: `${sendmg}`,
+              recipientPhone: recipientPhone,
+            });
+          }
         }
-
-      }
-      else if (intentName === "des_travel" || isdestination) {
+      } else if (intentName === "des_travel" || isdestination) {
         if (
           response.data.entities &&
           response.data.entities["wit$location:location"]
@@ -235,5 +311,5 @@ async function handleUserMessage(message, recipientPhone) {
 }
 
 module.exports = {
-  handleUserMessage,                                                                                                                                                          
+  handleUserMessage,
 };
