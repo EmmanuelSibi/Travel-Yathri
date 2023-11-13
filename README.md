@@ -49,3 +49,6 @@ While building the project, we encountered several challenges:
 ## Conclusion
 
 Building this AI-powered WhatsApp chatbot for trip planning has been an inspiring journey. It has enabled us to learn and apply various technologies and skills while overcoming challenges along the way. We are excited about the potential of this chatbot to make travel planning more accessible and efficient for people, and we look forward to further enhancing its capabilities and user experience in the future.
+
+## Video Link
+https://youtu.be/VXU7IDjSEyc
