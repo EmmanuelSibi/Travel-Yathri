@@ -4,6 +4,12 @@
 
 Building an AI-powered WhatsApp chatbot for trip planning has been an exciting and challenging journey. This project was inspired by the idea of making travel planning more convenient and accessible to people. We wanted to create a virtual assistant that could help users plan their trips efficiently, from finding the best places to visit to booking flights and hotels.
 
+## DEMO
+[![Watch the video](https://img.youtube.com/vi/VXU7IDjSEyc/hqdefault.jpg)](https://www.youtube.com/embed/VXU7IDjSEyc)
+
+[<img src="https://img.youtube.com/vi/VXU7IDjSEyc/hqdefault.jpg" width="600" height="300"
+/>](https://www.youtube.com/embed/VXU7IDjSEyc)
+
 ## What Inspired Us
 
 The inspiration for this project came from the desire to simplify the travel planning process. We live in a fast-paced world, and many people don't have the time to research and plan their trips in detail. We wanted to develop a chatbot that could provide personalized recommendations and help users save time and effort in planning their journeys. This project aimed to merge the power of AI and the widespread use of WhatsApp, making it easy for users to access trip planning assistance at their fingertips.
