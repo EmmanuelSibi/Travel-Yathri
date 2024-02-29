@@ -7,8 +7,7 @@ Building an AI-powered WhatsApp chatbot for trip planning has been an exciting a
 ## DEMO
 [![Watch the video](https://img.youtube.com/vi/VXU7IDjSEyc/hqdefault.jpg)](https://www.youtube.com/embed/VXU7IDjSEyc)
 
-[<img src="https://img.youtube.com/vi/VXU7IDjSEyc/hqdefault.jpg" width="600" height="300"
-/>](https://www.youtube.com/embed/VXU7IDjSEyc)
+
 
 ## What Inspired Us
 
